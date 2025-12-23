@@ -36,7 +36,6 @@ export default function EditProductPage() {
         try {
             const { data } = await api.get('/categories');
             const categoriesData = data.data || [];
-            console.log('Categories loaded:', categoriesData);
             setCategories(categoriesData);
         } catch (error) {
             console.error('Failed to fetch categories:', error);
@@ -55,11 +54,7 @@ export default function EditProductPage() {
                 return;
             }
 
-            console.log('Product fetched:', product);
-            console.log('Product category:', product.category);
-
             const categoryId = (product.category as any)?._id || product.category;
-            console.log('Extracted category ID:', categoryId);
 
             setFormData({
                 name: product.name,
@@ -70,8 +65,6 @@ export default function EditProductPage() {
                 category: categoryId || '',
                 isActive: product.isActive ?? true,
             });
-
-            console.log('Form data set with category:', categoryId);
 
             // Set existing image as preview
             if (product.images && product.images.length > 0) {
