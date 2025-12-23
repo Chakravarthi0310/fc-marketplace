@@ -21,4 +21,9 @@ export const orderService = {
         const response = await api.post(`/orders/${id}/cancel`);
         return response.data;
     },
+
+    async getFarmerOrders(): Promise<Order[]> {
+        const response = await api.get('/orders/farmer/orders');
+        return response.data.data;
+    },
 };

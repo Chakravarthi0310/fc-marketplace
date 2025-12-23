@@ -5,7 +5,7 @@ import { useProductStore } from '@/store/slices/productStore';
 import { useCartStore } from '@/store/slices/cartStore';
 import { ShoppingCart, Plus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function ProductsPage() {
     const { products, isLoading, fetchProducts } = useProductStore();
@@ -15,7 +15,9 @@ export default function ProductsPage() {
         fetchProducts();
     }, [fetchProducts]);
 
-    const handleAddToCart = async (productId: string) => {
+    const handleAddToCart = async (productId: string, e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent navigation
+        e.stopPropagation();
         try {
             await addItem(productId, 1);
         } catch (error) {
@@ -41,13 +43,13 @@ export default function ProductsPage() {
                             <h1 className="text-3xl font-bold text-gray-900">Fresh Products</h1>
                             <p className="text-gray-600 mt-1">Directly from local farmers</p>
                         </div>
-                        <a
+                        <Link
                             href="/cart"
                             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
                         >
                             <ShoppingCart className="w-5 h-5" />
                             View Cart
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -61,9 +63,10 @@ export default function ProductsPage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {products.map((product) => (
-                            <div
+                            <Link
                                 key={product._id}
-                                className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden"
+                                href={`/products/${product._id}`}
+                                className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden block"
                             >
                                 {/* Product Image */}
                                 <div className="relative h-48 bg-gray-200">
@@ -108,7 +111,7 @@ export default function ProductsPage() {
                                     </div>
 
                                     <button
-                                        onClick={() => handleAddToCart(product._id)}
+                                        onClick={(e) => handleAddToCart(product._id, e)}
                                         disabled={product.stock === 0}
                                         className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
@@ -116,7 +119,7 @@ export default function ProductsPage() {
                                         Add to Cart
                                     </button>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}

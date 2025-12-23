@@ -68,17 +68,17 @@ export default function CartPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Cart Items */}
                         <div className="lg:col-span-2 space-y-4">
-                            {cart.items.map((item) => (
+                            {cart.items.map((item, index) => (
                                 <div
-                                    key={item.productId._id}
+                                    key={item.productId?._id || index}
                                     className="bg-white rounded-xl shadow-sm p-6 flex gap-4"
                                 >
                                     {/* Product Image */}
                                     <div className="relative w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0">
-                                        {item.productId.images && item.productId.images.length > 0 ? (
+                                        {item.productId?.images && item.productId.images.length > 0 ? (
                                             <Image
                                                 src={item.productId.images[0]}
-                                                alt={item.productId.name}
+                                                alt={item.productId?.name || 'Product'}
                                                 fill
                                                 className="object-cover rounded-lg"
                                             />
@@ -92,24 +92,24 @@ export default function CartPage() {
                                     {/* Product Info */}
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                                            {item.productId.name}
+                                            {item.productId?.name || 'Product'}
                                         </h3>
                                         <p className="text-gray-600 text-sm mb-2">
-                                            ₹{item.productId.price} / {item.productId.unit}
+                                            ₹{item.productId?.price || 0} / {item.productId?.unit || 'unit'}
                                         </p>
 
                                         {/* Quantity Controls */}
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center border border-gray-300 rounded-lg">
                                                 <button
-                                                    onClick={() => handleQuantityChange(item.productId._id, item.quantity - 1)}
+                                                    onClick={() => item.productId?._id && handleQuantityChange(item.productId._id, item.quantity - 1)}
                                                     className="p-2 hover:bg-gray-100 transition"
                                                 >
                                                     <Minus className="w-4 h-4" />
                                                 </button>
                                                 <span className="px-4 font-semibold">{item.quantity}</span>
                                                 <button
-                                                    onClick={() => handleQuantityChange(item.productId._id, item.quantity + 1)}
+                                                    onClick={() => item.productId?._id && handleQuantityChange(item.productId._id, item.quantity + 1)}
                                                     className="p-2 hover:bg-gray-100 transition"
                                                 >
                                                     <Plus className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function CartPage() {
                                             </div>
 
                                             <button
-                                                onClick={() => handleRemove(item.productId._id)}
+                                                onClick={() => item.productId?._id && handleRemove(item.productId._id)}
                                                 className="text-red-600 hover:text-red-700 p-2"
                                             >
                                                 <Trash2 className="w-5 h-5" />
@@ -128,7 +128,7 @@ export default function CartPage() {
                                     {/* Item Total */}
                                     <div className="text-right">
                                         <p className="text-xl font-bold text-gray-900">
-                                            ₹{(item.productId.price * item.quantity).toFixed(2)}
+                                            ₹{((item.productId?.price || 0) * item.quantity).toFixed(2)}
                                         </p>
                                     </div>
                                 </div>
@@ -143,7 +143,7 @@ export default function CartPage() {
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between text-gray-600">
                                         <span>Subtotal</span>
-                                        <span>₹{cart.subtotal.toFixed(2)}</span>
+                                        <span>₹{cart?.subtotal?.toFixed(2) || '0.00'}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
                                         <span>Delivery</span>
@@ -151,7 +151,7 @@ export default function CartPage() {
                                     </div>
                                     <div className="border-t pt-3 flex justify-between text-lg font-bold text-gray-900">
                                         <span>Total</span>
-                                        <span>₹{cart.total.toFixed(2)}</span>
+                                        <span>₹{cart?.total?.toFixed(2) || '0.00'}</span>
                                     </div>
                                 </div>
 

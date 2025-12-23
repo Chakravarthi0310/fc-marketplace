@@ -118,19 +118,19 @@ export default function CheckoutPage() {
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
 
                         <div className="space-y-2 mb-4">
-                            {cart.items.map((item) => (
-                                <div key={item.productId._id} className="flex justify-between text-gray-600">
+                            {cart.items.map((item, index) => (
+                                <div key={item.productId?._id || index} className="flex justify-between text-gray-600">
                                     <span>
-                                        {item.productId.name} x {item.quantity}
+                                        {item.productId?.name || 'Product'} x {item.quantity}
                                     </span>
-                                    <span>₹{(item.productId.price * item.quantity).toFixed(2)}</span>
+                                    <span>₹{((item.productId?.price || 0) * item.quantity).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
 
                         <div className="border-t pt-4 flex justify-between text-lg font-bold text-gray-900">
                             <span>Total</span>
-                            <span>₹{cart.total.toFixed(2)}</span>
+                            <span>₹{cart?.total?.toFixed(2) || '0.00'}</span>
                         </div>
                     </div>
 
