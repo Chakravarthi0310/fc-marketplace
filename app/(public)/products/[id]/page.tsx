@@ -6,6 +6,7 @@ import { useProductStore } from '@/store/slices/productStore';
 import { useCartStore } from '@/store/slices/cartStore';
 import { ArrowLeft, ShoppingCart, Package, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import Navbar from '@/components/layout/Navbar';
 
 export default function ProductDetailPage() {
     const params = useParams();
@@ -39,6 +40,7 @@ export default function ProductDetailPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <Navbar />
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Back Button */}
                 <button

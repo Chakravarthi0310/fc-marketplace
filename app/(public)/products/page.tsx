@@ -3,27 +3,21 @@
 import { useEffect } from 'react';
 import { useProductStore } from '@/store/slices/productStore';
 import { useCartStore } from '@/store/slices/cartStore';
-import { useAuthStore } from '@/store/slices/authStore';
-import { ShoppingCart, Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Navbar from '@/components/layout/Navbar';
 
 export default function ProductsPage() {
     const { products, isLoading, fetchProducts } = useProductStore();
-    const { cart, addItem, fetchCart } = useCartStore();
-    const { isAuthenticated } = useAuthStore();
+    const { addItem } = useCartStore();
 
     useEffect(() => {
         fetchProducts();
-        if (isAuthenticated) {
-            fetchCart();
-        }
-    }, [fetchProducts, fetchCart, isAuthenticated]);
-
-    const cartCount = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
+    }, [fetchProducts]);
 
     const handleAddToCart = async (productId: string, e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent navigation
+        e.preventDefault();
         e.stopPropagation();
         try {
             await addItem(productId, 1);
@@ -42,27 +36,17 @@ export default function ProductsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
+            <Navbar />
+
+            {/* Page Title */}
             <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Fresh Products</h1>
-                            <p className="text-gray-600 mt-1">Directly from local farmers</p>
-                        </div>
-                        <Link
-                            href="/cart"
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition relative"
-                        >
-                            <ShoppingCart className="w-5 h-5" />
-                            View Cart
-                            {cartCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-white">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
-                    </div>
+                <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-4 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        Fresh From The Farm
+                    </h1>
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        Connect directly with local farmers and get fresh, organic produce delivered to your doorstep.
+                    </p>
                 </div>
             </div>
 
