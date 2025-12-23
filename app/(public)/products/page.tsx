@@ -3,17 +3,24 @@
 import { useEffect } from 'react';
 import { useProductStore } from '@/store/slices/productStore';
 import { useCartStore } from '@/store/slices/cartStore';
+import { useAuthStore } from '@/store/slices/authStore';
 import { ShoppingCart, Plus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function ProductsPage() {
     const { products, isLoading, fetchProducts } = useProductStore();
-    const { addItem } = useCartStore();
+    const { cart, addItem, fetchCart } = useCartStore();
+    const { isAuthenticated } = useAuthStore();
 
     useEffect(() => {
         fetchProducts();
-    }, [fetchProducts]);
+        if (isAuthenticated) {
+            fetchCart();
+        }
+    }, [fetchProducts, fetchCart, isAuthenticated]);
+
+    const cartCount = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
     const handleAddToCart = async (productId: string, e: React.MouseEvent) => {
         e.preventDefault(); // Prevent navigation
@@ -45,10 +52,15 @@ export default function ProductsPage() {
                         </div>
                         <Link
                             href="/cart"
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition relative"
                         >
                             <ShoppingCart className="w-5 h-5" />
                             View Cart
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-white">
+                                    {cartCount}
+                                </span>
+                            )}
                         </Link>
                     </div>
                 </div>

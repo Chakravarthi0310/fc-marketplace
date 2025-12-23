@@ -30,7 +30,7 @@ export interface Product {
     price: number;
     unit: string;
     stock: number;
-    category: string;
+    category: string | { name: string; _id?: string };
     farmerId: string;
     images: string[];
     isActive: boolean;

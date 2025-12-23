@@ -133,7 +133,11 @@ export default function ProductDetailPage() {
                             <dl className="space-y-3">
                                 <div className="flex justify-between">
                                     <dt className="text-gray-600">Category</dt>
-                                    <dd className="font-semibold text-gray-900">{selectedProduct.category}</dd>
+                                    <dd className="font-semibold text-gray-900">
+                                        {typeof selectedProduct.category === 'object'
+                                            ? selectedProduct.category.name
+                                            : selectedProduct.category}
+                                    </dd>
                                 </div>
                                 <div className="flex justify-between">
                                     <dt className="text-gray-600">Unit</dt>

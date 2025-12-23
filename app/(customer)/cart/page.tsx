@@ -10,13 +10,19 @@ import Image from 'next/image';
 export default function CartPage() {
     const router = useRouter();
     const { isAuthenticated } = useAuthStore();
-    const { cart, isLoading, fetchCart, updateQuantity, removeItem } = useCartStore();
+    const { cart, isLoading, fetchCart, updateQuantity, removeItem, clearCart } = useCartStore();
 
     useEffect(() => {
         if (isAuthenticated) {
             fetchCart();
         }
     }, [isAuthenticated, fetchCart]);
+
+    const handleClear = async () => {
+        if (confirm('Are you sure you want to clear your cart?')) {
+            await clearCart();
+        }
+    };
 
     const handleQuantityChange = async (productId: string, newQuantity: number) => {
         if (newQuantity < 1 || newQuantity > 50) return;
@@ -50,7 +56,18 @@ export default function CartPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+                    {cart && cart.items.length > 0 && (
+                        <button
+                            onClick={handleClear}
+                            className="text-red-600 hover:text-red-700 font-medium flex items-center gap-2"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                            Clear Cart
+                        </button>
+                    )}
+                </div>
 
                 {!cart || cart.items.length === 0 ? (
                     <div className="bg-white rounded-xl shadow-sm p-12 text-center">

@@ -10,7 +10,7 @@ interface CartState {
     addItem: (productId: string, quantity: number) => Promise<void>;
     updateQuantity: (productId: string, quantity: number) => Promise<void>;
     removeItem: (productId: string) => Promise<void>;
-    clearCart: () => void;
+    clearCart: () => Promise<void>;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -69,7 +69,15 @@ export const useCartStore = create<CartState>((set, get) => ({
         }
     },
 
-    clearCart: () => {
-        set({ cart: null });
+    clearCart: async () => {
+        set({ isLoading: true });
+        try {
+            await cartService.clear();
+            set({ cart: null, isLoading: false });
+            toast.success('Cart cleared');
+        } catch (error) {
+            set({ isLoading: false });
+            toast.error('Failed to clear cart');
+        }
     },
 }));
