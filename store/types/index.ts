@@ -35,6 +35,20 @@ export interface Product {
     images: string[];
     isActive: boolean;
     createdAt: string;
+    averageRating?: number;
+    ratingCount?: number;
+}
+
+export interface Review {
+    _id: string;
+    productId: string;
+    userId: {
+        _id: string;
+        name: string;
+    };
+    rating: number;
+    comment: string;
+    createdAt: string;
 }
 
 export interface CartItem {

@@ -5,22 +5,25 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/slices/authStore';
 import { productService } from '@/services/product.service';
 import { orderService } from '@/services/order.service';
-import { Plus, Package, ShoppingBag, Search, AlertCircle, Clock, CheckCircle, XCircle, LogOut } from 'lucide-react';
+import { reviewService } from '@/services/review.service';
+import { Plus, Package, ShoppingBag, Search, AlertCircle, Clock, CheckCircle, XCircle, LogOut, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import StatsOverview from '@/components/farmer/StatsOverview';
 import ProductCard from '@/components/farmer/ProductCard';
 import OrderCard from '@/components/farmer/OrderCard';
+import FarmerReviewList from '@/components/farmer/FarmerReviewList';
 import Pagination from '@/components/ui/Pagination';
 import { Product } from '@/store/types';
 
-type TabType = 'products' | 'orders';
+type TabType = 'products' | 'orders' | 'reviews';
 
 export default function FarmerDashboard() {
     const router = useRouter();
     const { user, logout } = useAuthStore();
     const [products, setProducts] = useState<Product[]>([]);
     const [orders, setOrders] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [farmerProfile, setFarmerProfile] = useState<any>(null);
     const [profileLoading, setProfileLoading] = useState(true);
@@ -30,6 +33,7 @@ export default function FarmerDashboard() {
     // Pagination State
     const [productsPagination, setProductsPagination] = useState({ page: 1, totalPages: 1 });
     const [ordersPagination, setOrdersPagination] = useState({ page: 1, totalPages: 1 });
+    const [reviewsPagination, setReviewsPagination] = useState({ page: 1, totalPages: 1 });
 
     useEffect(() => {
         fetchFarmerProfile();
@@ -40,6 +44,7 @@ export default function FarmerDashboard() {
         if (farmerProfile?.verificationStatus === 'APPROVED') {
             fetchMyProducts();
             fetchMyOrders();
+            fetchMyReviews();
         } else {
             setIsLoading(false);
         }
@@ -88,6 +93,20 @@ export default function FarmerDashboard() {
         } catch (error) {
             console.error('Error fetching orders:', error);
             toast.error('Failed to fetch orders');
+        }
+    };
+
+    const fetchMyReviews = async (page = 1) => {
+        try {
+            const response: any = await reviewService.getFarmerReviews(page, 10);
+            setReviews(response.docs || []);
+            setReviewsPagination({
+                page: response.page,
+                totalPages: response.pages || response.totalPages
+            });
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            toast.error('Failed to fetch reviews');
         }
     };
 
@@ -260,6 +279,19 @@ export default function FarmerDashboard() {
                                 {orders.length}
                             </span>
                         </button>
+                        <button
+                            onClick={() => setActiveTab('reviews')}
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors duration-200 flex items-center gap-2 ${activeTab === 'reviews'
+                                ? 'border-green-600 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            <Star className="w-4 h-4" />
+                            Reviews
+                            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                                {reviews.length}
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -330,7 +362,7 @@ export default function FarmerDashboard() {
                             />
                         )}
                     </div>
-                ) : (
+                ) : activeTab === 'orders' ? (
                     <div className="space-y-6">
                         {orders.length === 0 ? (
                             <div className="bg-white rounded-xl shadow-sm border border-dashed border-gray-300 p-12 text-center">
@@ -358,6 +390,17 @@ export default function FarmerDashboard() {
                                 currentPage={ordersPagination.page}
                                 totalPages={ordersPagination.totalPages}
                                 onPageChange={(page) => fetchMyOrders(page)}
+                            />
+                        )}
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        <FarmerReviewList reviews={reviews} />
+                        {reviews.length > 0 && (
+                            <Pagination
+                                currentPage={reviewsPagination.page}
+                                totalPages={reviewsPagination.totalPages}
+                                onPageChange={(page) => fetchMyReviews(page)}
                             />
                         )}
                     </div>

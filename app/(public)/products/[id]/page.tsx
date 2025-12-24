@@ -1,18 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useProductStore } from '@/store/slices/productStore';
 import { useCartStore } from '@/store/slices/cartStore';
-import { ArrowLeft, ShoppingCart, Package, Loader2 } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Package, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
+import ReviewList from '@/components/reviews/ReviewList';
+import ReviewForm from '@/components/reviews/ReviewForm';
 
 export default function ProductDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { selectedProduct, isLoading, fetchProductById } = useProductStore();
     const { addItem } = useCartStore();
+    const [refreshReviews, setRefreshReviews] = useState(0);
 
     useEffect(() => {
         if (params.id) {
@@ -90,6 +93,18 @@ export default function ProductDetailPage() {
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
                             {selectedProduct.name}
                         </h1>
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="flex items-center text-yellow-500">
+                                <Star className="w-5 h-5 fill-current" />
+                                <span className="ml-1 font-bold text-gray-900">
+                                    {selectedProduct.averageRating?.toFixed(1) || '0.0'}
+                                </span>
+                            </div>
+                            <span className="text-gray-300">|</span>
+                            <span className="text-gray-600">
+                                {selectedProduct.ratingCount || 0} reviews
+                            </span>
+                        </div>
 
                         <div className="flex items-baseline gap-2 mb-6">
                             <span className="text-4xl font-bold text-green-600">
@@ -150,6 +165,22 @@ export default function ProductDetailPage() {
                                     <dd className="font-semibold text-gray-900">{selectedProduct.stock}</dd>
                                 </div>
                             </dl>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="mt-16">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-8">Customer Reviews</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2">
+                            <ReviewList productId={params.id as string} refreshTrigger={refreshReviews} />
+                        </div>
+                        <div>
+                            <ReviewForm
+                                productId={params.id as string}
+                                onReviewAdded={() => setRefreshReviews(prev => prev + 1)}
+                            />
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useProductStore } from '@/store/slices/productStore';
 import { useCartStore } from '@/store/slices/cartStore';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
@@ -107,9 +107,20 @@ export default function ProductsPage() {
                                             </span>
                                             <span className="text-gray-500 text-sm">/{product.unit}</span>
                                         </div>
-                                        <span className="text-sm text-gray-500">
-                                            Stock: {product.stock}
-                                        </span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-sm text-gray-500 mb-1">
+                                                Stock: {product.stock}
+                                            </span>
+                                            <div className="flex items-center gap-1">
+                                                <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                                                <span className="text-xs font-semibold text-gray-700">
+                                                    {product.averageRating?.toFixed(1) || '0.0'}
+                                                </span>
+                                                <span className="text-xs text-gray-400">
+                                                    ({product.ratingCount || 0})
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <button
