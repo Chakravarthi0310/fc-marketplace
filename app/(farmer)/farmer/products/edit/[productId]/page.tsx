@@ -45,8 +45,7 @@ export default function EditProductPage() {
 
     const fetchProduct = async () => {
         try {
-            const products = await productService.getAll();
-            const product = products.find((p: any) => p._id === productId);
+            const product = await productService.getById(productId);
 
             if (!product) {
                 toast.error('Product not found');
