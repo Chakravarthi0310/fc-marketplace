@@ -2,6 +2,13 @@ import { create } from 'zustand';
 import adminService, { Farmer, AdminOrder, Category, DashboardStats } from '@/services/admin.service';
 import toast from 'react-hot-toast';
 
+interface PaginationMeta {
+    page: number;
+    limit: number;
+    totalPages: number;
+    total: number;
+}
+
 interface AdminState {
     // State
     farmers: Farmer[];
@@ -9,15 +16,19 @@ interface AdminState {
     categories: Category[];
     stats: DashboardStats | null;
     isLoading: boolean;
+    pagination: {
+        farmers: PaginationMeta;
+        orders: PaginationMeta;
+    };
 
     // Farmer Actions
-    fetchAllFarmers: () => Promise<void>;
-    fetchPendingFarmers: () => Promise<void>;
+    fetchAllFarmers: (page?: number, limit?: number) => Promise<void>;
+    fetchPendingFarmers: (page?: number, limit?: number) => Promise<void>;
     approveFarmer: (farmerId: string) => Promise<void>;
     rejectFarmer: (farmerId: string) => Promise<void>;
 
     // Order Actions
-    fetchAllOrders: (status?: string) => Promise<void>;
+    fetchAllOrders: (status?: string, page?: number, limit?: number) => Promise<void>;
     updateOrderStatus: (orderId: string, status: string) => Promise<void>;
 
     // Category Actions
@@ -37,13 +48,38 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     categories: [],
     stats: null,
     isLoading: false,
+    pagination: {
+        farmers: { page: 1, limit: 10, totalPages: 1, total: 0 },
+        orders: { page: 1, limit: 10, totalPages: 1, total: 0 },
+    },
 
     // Farmer Actions
-    fetchAllFarmers: async () => {
+    fetchAllFarmers: async (page = 1, limit = 10) => {
         set({ isLoading: true });
         try {
-            const farmers = await adminService.getAllFarmers();
-            set({ farmers, isLoading: false });
+            const response = await adminService.getAllFarmers(page, limit);
+            // Check if response has pagination structure (docs) or legacy array
+            const data = response.data || response;
+            const farmers = Array.isArray(data) ? data : data.docs || [];
+
+            // Should be paginated now
+            if (!Array.isArray(data) && data.docs) {
+                set({
+                    farmers: data.docs,
+                    pagination: {
+                        ...get().pagination,
+                        farmers: {
+                            page: data.page,
+                            limit: data.limit,
+                            totalPages: data.pages,
+                            total: data.total
+                        }
+                    },
+                    isLoading: false
+                });
+            } else {
+                set({ farmers, isLoading: false });
+            }
         } catch (error: any) {
             set({ isLoading: false });
             toast.error(error.response?.data?.message || 'Failed to fetch farmers');
@@ -51,11 +87,28 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         }
     },
 
-    fetchPendingFarmers: async () => {
+    fetchPendingFarmers: async (page = 1, limit = 10) => {
         set({ isLoading: true });
         try {
-            const farmers = await adminService.getPendingFarmers();
-            set({ farmers, isLoading: false });
+            const response = await adminService.getPendingFarmers(page, limit);
+            const data = response.data || response;
+            if (!Array.isArray(data) && data.docs) {
+                set({
+                    farmers: data.docs,
+                    pagination: {
+                        ...get().pagination,
+                        farmers: {
+                            page: data.page,
+                            limit: data.limit,
+                            totalPages: data.pages,
+                            total: data.total
+                        }
+                    },
+                    isLoading: false
+                });
+            } else {
+                set({ farmers: Array.isArray(data) ? data : [], isLoading: false });
+            }
         } catch (error: any) {
             set({ isLoading: false });
             toast.error(error.response?.data?.message || 'Failed to fetch pending farmers');
@@ -92,11 +145,28 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     },
 
     // Order Actions
-    fetchAllOrders: async (status?: string) => {
+    fetchAllOrders: async (status, page = 1, limit = 10) => {
         set({ isLoading: true });
         try {
-            const orders = await adminService.getAllOrders(status);
-            set({ orders, isLoading: false });
+            const response = await adminService.getAllOrders(status, page, limit);
+            const data = response.data || response;
+            if (!Array.isArray(data) && data.docs) {
+                set({
+                    orders: data.docs,
+                    pagination: {
+                        ...get().pagination,
+                        orders: {
+                            page: data.page,
+                            limit: data.limit,
+                            totalPages: data.pages,
+                            total: data.total
+                        }
+                    },
+                    isLoading: false
+                });
+            } else {
+                set({ orders: Array.isArray(data) ? data : [], isLoading: false });
+            }
         } catch (error: any) {
             set({ isLoading: false });
             toast.error(error.response?.data?.message || 'Failed to fetch orders');

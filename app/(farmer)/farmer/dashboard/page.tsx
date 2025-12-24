@@ -11,6 +11,7 @@ import api from '@/lib/axios';
 import StatsOverview from '@/components/farmer/StatsOverview';
 import ProductCard from '@/components/farmer/ProductCard';
 import OrderCard from '@/components/farmer/OrderCard';
+import Pagination from '@/components/ui/Pagination';
 import { Product } from '@/store/types';
 
 type TabType = 'products' | 'orders';
@@ -25,6 +26,10 @@ export default function FarmerDashboard() {
     const [profileLoading, setProfileLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('products');
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Pagination State
+    const [productsPagination, setProductsPagination] = useState({ page: 1, totalPages: 1 });
+    const [ordersPagination, setOrdersPagination] = useState({ page: 1, totalPages: 1 });
 
     useEffect(() => {
         fetchFarmerProfile();
@@ -55,14 +60,15 @@ export default function FarmerDashboard() {
         }
     };
 
-    const fetchMyProducts = async () => {
+    const fetchMyProducts = async (page = 1) => {
         try {
-            const allProducts = await productService.getAll();
-            // Filter products by current farmer's farmerId
-            const myProducts = allProducts.filter((p: any) => {
-                return p.farmerId?.toString() === farmerProfile?._id?.toString();
+            if (!farmerProfile?._id) return;
+            const response: any = await productService.getAll({ farmerId: farmerProfile._id }, page, 8); // Limit 8 for grid
+            setProducts(response.docs || []);
+            setProductsPagination({
+                page: response.page,
+                totalPages: response.pages || response.totalPages
             });
-            setProducts(myProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
             toast.error('Failed to fetch products');
@@ -71,10 +77,14 @@ export default function FarmerDashboard() {
         }
     };
 
-    const fetchMyOrders = async () => {
+    const fetchMyOrders = async (page = 1) => {
         try {
-            const farmerOrders = await orderService.getFarmerOrders();
-            setOrders(farmerOrders);
+            const response: any = await orderService.getFarmerOrders(page, 10);
+            setOrders(response.docs || []);
+            setOrdersPagination({
+                page: response.page,
+                totalPages: response.pages || response.totalPages
+            });
         } catch (error) {
             console.error('Error fetching orders:', error);
             toast.error('Failed to fetch orders');
@@ -312,6 +322,13 @@ export default function FarmerDashboard() {
                                 ))}
                             </div>
                         )}
+                        {filteredProducts.length > 0 && (
+                            <Pagination
+                                currentPage={productsPagination.page}
+                                totalPages={productsPagination.totalPages}
+                                onPageChange={(page) => fetchMyProducts(page)}
+                            />
+                        )}
                     </div>
                 ) : (
                     <div className="space-y-6">
@@ -335,6 +352,13 @@ export default function FarmerDashboard() {
                                     />
                                 ))}
                             </div>
+                        )}
+                        {orders.length > 0 && (
+                            <Pagination
+                                currentPage={ordersPagination.page}
+                                totalPages={ordersPagination.totalPages}
+                                onPageChange={(page) => fetchMyOrders(page)}
+                            />
                         )}
                     </div>
                 )}

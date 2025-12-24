@@ -66,14 +66,14 @@ export interface DashboardStats {
 
 const adminService = {
     // Farmer Management
-    getAllFarmers: async (): Promise<Farmer[]> => {
-        const response = await axios.get('/farmers/admin/all');
-        return response.data.data;
+    getAllFarmers: async (page = 1, limit = 10): Promise<any> => {
+        const response = await axios.get('/farmers/admin/all', { params: { page, limit } });
+        return response.data; // Return full response data which includes { success, data: { docs, total... } }
     },
 
-    getPendingFarmers: async (): Promise<Farmer[]> => {
-        const response = await axios.get('/farmers/admin/pending');
-        return response.data.data;
+    getPendingFarmers: async (page = 1, limit = 10): Promise<any> => {
+        const response = await axios.get('/farmers/admin/pending', { params: { page, limit } });
+        return response.data;
     },
 
     approveFarmer: async (farmerId: string): Promise<Farmer> => {
@@ -87,10 +87,11 @@ const adminService = {
     },
 
     // Order Management
-    getAllOrders: async (status?: string): Promise<AdminOrder[]> => {
-        const params = status ? { status } : {};
+    getAllOrders: async (status?: string, page = 1, limit = 10): Promise<any> => {
+        const params: any = { page, limit };
+        if (status) params.status = status;
         const response = await axios.get('/orders/admin/all', { params });
-        return response.data.data;
+        return response.data;
     },
 
     updateOrderStatus: async (orderId: string, status: string): Promise<AdminOrder> => {

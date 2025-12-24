@@ -7,14 +7,20 @@ import { Plus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
+import Pagination from '@/components/ui/Pagination';
 
 export default function ProductsPage() {
-    const { products, isLoading, fetchProducts } = useProductStore();
+    const { products, isLoading, fetchProducts, pagination } = useProductStore();
+    const productsPagination = pagination || { page: 1, totalPages: 1 };
     const { addItem } = useCartStore();
 
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
+
+    const handlePageChange = (page: number) => {
+        fetchProducts({}, page);
+    };
 
     const handleAddToCart = async (productId: string, e: React.MouseEvent) => {
         e.preventDefault();
@@ -118,6 +124,14 @@ export default function ProductsPage() {
                             </Link>
                         ))}
                     </div>
+                )}
+
+                {products && products.length > 0 && (
+                    <Pagination
+                        currentPage={productsPagination.page}
+                        totalPages={productsPagination.totalPages}
+                        onPageChange={handlePageChange}
+                    />
                 )}
             </div>
         </div>

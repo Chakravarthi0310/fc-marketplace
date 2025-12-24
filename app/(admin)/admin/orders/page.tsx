@@ -3,11 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/slices/adminStore';
 import { Package, ChevronDown, CreditCard, ClipboardCheck, Truck, CheckCircle, Search, Calendar, Filter } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 type OrderStatus = 'ALL' | 'PAYMENT_PENDING' | 'PAID' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
 export default function OrdersPage() {
-    const { orders, isLoading, fetchAllOrders, updateOrderStatus } = useAdminStore();
+    const { orders, isLoading, fetchAllOrders, updateOrderStatus, pagination } = useAdminStore();
+    const ordersPagination = pagination?.orders || { page: 1, totalPages: 1 };
+
+    const handlePageChange = (page: number) => {
+        fetchAllOrders(statusFilter === 'ALL' ? undefined : statusFilter, page);
+    };
     const [statusFilter, setStatusFilter] = useState<OrderStatus>('ALL');
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
     const [activeActionId, setActiveActionId] = useState<string | null>(null);
@@ -493,6 +499,12 @@ export default function OrdersPage() {
                         ))
                     )}
                 </div>
+
+                <Pagination
+                    currentPage={ordersPagination.page}
+                    totalPages={ordersPagination.totalPages}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );

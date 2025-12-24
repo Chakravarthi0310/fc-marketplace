@@ -95,9 +95,16 @@ export default function OrderCard({ order, farmerId }: OrderCardProps) {
                         {myItems.map((item: any, idx: number) => (
                             <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50 transition">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                                        {/* If we had item images, they would go here */}
-                                        <span className="text-xs font-bold">x{item.quantity}</span>
+                                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 overflow-hidden relative">
+                                        {item.productId?.images?.[0] ? (
+                                            <img
+                                                src={item.productId.images[0]}
+                                                alt={item.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-xs font-bold">x{item.quantity}</span>
+                                        )}
                                     </div>
                                     <div>
                                         <p className="font-medium text-gray-900">{item.name}</p>

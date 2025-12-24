@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import { Order, Address, PaymentOrder } from '@/store/types';
+import { Order, Address } from '@/store/types';
 
 export const orderService = {
     async create(deliveryAddress: Address): Promise<Order> {
@@ -7,9 +7,11 @@ export const orderService = {
         return response.data.data;
     },
 
-    async getAll(): Promise<Order[]> {
-        const response = await api.get('/orders');
-        return response.data.data;
+    async getAll(page = 1, limit = 10): Promise<{ docs: Order[], total: number, page: number, pages: number }> {
+        const response = await api.get('/orders', {
+            params: { page, limit }
+        });
+        return response.data.data; // Response likely { docs: [], total: ... }
     },
 
     async getById(id: string): Promise<Order> {
@@ -22,8 +24,10 @@ export const orderService = {
         return response.data.data;
     },
 
-    async getFarmerOrders(): Promise<Order[]> {
-        const response = await api.get('/orders/farmer/orders');
+    async getFarmerOrders(page = 1, limit = 10): Promise<{ docs: Order[], total: number, page: number, pages: number }> {
+        const response = await api.get('/orders/farmer/orders', {
+            params: { page, limit }
+        });
         return response.data.data;
     },
 };

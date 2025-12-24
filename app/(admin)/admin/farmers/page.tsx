@@ -3,11 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/slices/adminStore';
 import { CheckCircle, XCircle, Clock, User } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 type TabType = 'all' | 'pending' | 'approved' | 'rejected';
 
 export default function FarmersPage() {
-    const { farmers, isLoading, fetchAllFarmers, fetchPendingFarmers, approveFarmer, rejectFarmer } = useAdminStore();
+    const { farmers, isLoading, fetchAllFarmers, fetchPendingFarmers, approveFarmer, rejectFarmer, pagination } = useAdminStore();
+    const farmersPagination = pagination?.farmers || { page: 1, totalPages: 1 };
+
     const [activeTab, setActiveTab] = useState<TabType>('pending');
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -18,6 +21,14 @@ export default function FarmersPage() {
             fetchAllFarmers();
         }
     }, [activeTab, fetchAllFarmers, fetchPendingFarmers]);
+
+    const handlePageChange = (page: number) => {
+        if (activeTab === 'pending') {
+            fetchPendingFarmers(page);
+        } else {
+            fetchAllFarmers(page);
+        }
+    };
 
     const filteredFarmers = farmers.filter((farmer) => {
         const matchesSearch =
@@ -280,6 +291,12 @@ export default function FarmersPage() {
                         ))
                     )}
                 </div>
+
+                <Pagination
+                    currentPage={farmersPagination.page}
+                    totalPages={farmersPagination.totalPages}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );

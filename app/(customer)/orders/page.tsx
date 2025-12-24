@@ -5,9 +5,12 @@ import { useOrderStore } from '@/store/slices/orderStore';
 import { useAuthStore } from '@/store/slices/authStore';
 import { Package, Calendar, MapPin, Loader2, ArrowRight, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
+import Pagination from '@/components/ui/Pagination';
 
 export default function OrdersPage() {
-    const { orders, isLoading, fetchOrders } = useOrderStore();
+    const { orders, isLoading, fetchOrders, pagination } = useOrderStore();
+    const ordersPagination = pagination || { page: 1, totalPages: 1 };
+
     const { isAuthenticated, user } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
@@ -18,6 +21,10 @@ export default function OrdersPage() {
             fetchOrders();
         }
     }, [isAuthenticated, fetchOrders]);
+
+    const handlePageChange = (page: number) => {
+        fetchOrders(page);
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -225,6 +232,14 @@ export default function OrdersPage() {
                             </div>
                         ))}
                     </div>
+                )}
+
+                {orders && orders.length > 0 && (
+                    <Pagination
+                        currentPage={ordersPagination.page}
+                        totalPages={ordersPagination.totalPages}
+                        onPageChange={handlePageChange}
+                    />
                 )}
             </div>
         </div>
