@@ -112,7 +112,7 @@ export default function EditProductPage() {
                 stock: parseInt(formData.stock),
                 category: formData.category,
                 isActive: formData.isActive,
-                images: [imageUrl], // Update images array
+                images: imageUrl ? [imageUrl] : [], // Ensure no empty strings
             };
 
             await productService.update(productId, productData);
