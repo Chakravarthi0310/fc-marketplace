@@ -37,9 +37,6 @@ export const productService = {
         const response = await fetch(uploadUrl, {
             method: 'PUT',
             body: file,
-            headers: {
-                'Content-Type': file.type,
-            },
         });
 
         if (!response.ok) {
