@@ -50,7 +50,7 @@ export default function FarmersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className="min-h-screen">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
@@ -70,144 +70,215 @@ export default function FarmersPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="mb-6 flex space-x-4 border-b">
-                    <button
-                        onClick={() => setActiveTab('pending')}
-                        className={`pb-2 px-4 font-medium ${activeTab === 'pending'
-                            ? 'border-b-2 border-emerald-600 text-emerald-600'
-                            : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                    >
-                        Pending
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('approved')}
-                        className={`pb-2 px-4 font-medium ${activeTab === 'approved'
-                            ? 'border-b-2 border-emerald-600 text-emerald-600'
-                            : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                    >
-                        Approved
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('rejected')}
-                        className={`pb-2 px-4 font-medium ${activeTab === 'rejected'
-                            ? 'border-b-2 border-emerald-600 text-emerald-600'
-                            : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                    >
-                        Rejected
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('all')}
-                        className={`pb-2 px-4 font-medium ${activeTab === 'all'
-                            ? 'border-b-2 border-emerald-600 text-emerald-600'
-                            : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                    >
-                        All Farmers
-                    </button>
+                <div className="mb-6 overflow-x-auto pb-1">
+                    <div className="flex space-x-4 border-b min-w-max">
+                        <button
+                            onClick={() => setActiveTab('pending')}
+                            className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'pending'
+                                ? 'border-b-2 border-emerald-600 text-emerald-600'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            Pending
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('approved')}
+                            className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'approved'
+                                ? 'border-b-2 border-emerald-600 text-emerald-600'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            Approved
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('rejected')}
+                            className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'rejected'
+                                ? 'border-b-2 border-emerald-600 text-emerald-600'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            Rejected
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('all')}
+                            className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'all'
+                                ? 'border-b-2 border-emerald-600 text-emerald-600'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            All Farmers
+                        </button>
+                    </div>
                 </div>
 
-                {/* Farmers Table */}
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Farmer
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Farm Details
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Registered
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {!filteredFarmers || filteredFarmers.length === 0 ? (
+                {/* Farmers Table (Desktop) */}
+                <div className="hidden md:block bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            {/* ... Content same as before ... */}
+                            <thead className="bg-gray-50">
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                                        No farmers found
-                                    </td>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Farmer
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Farm Details
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Registered
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
                                 </tr>
-                            ) : (
-                                filteredFarmers.map((farmer) => (
-                                    <tr key={farmer._id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                                                    <User className="h-6 w-6 text-emerald-600" />
-                                                </div>
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-medium text-gray-900">{farmer.userId.name}</div>
-                                                    <div className="text-sm text-gray-500">{farmer.userId.email}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900">{farmer.farmName}</div>
-                                            <div className="text-sm text-gray-500">
-                                                {farmer.farmSize} acres • {farmer.farmingType}
-                                            </div>
-                                            <div className="text-sm text-gray-500">{farmer.experience} years experience</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {farmer.verificationStatus === 'APPROVED' && (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                                    Approved
-                                                </span>
-                                            )}
-                                            {farmer.verificationStatus === 'PENDING' && (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                    <Clock className="w-4 h-4 mr-1" />
-                                                    Pending
-                                                </span>
-                                            )}
-                                            {farmer.verificationStatus === 'REJECTED' && (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                    <XCircle className="w-4 h-4 mr-1" />
-                                                    Rejected
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Date(farmer.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            {farmer.verificationStatus === 'PENDING' && (
-                                                <div className="flex space-x-2">
-                                                    <button
-                                                        onClick={() => handleApprove(farmer.userId._id)}
-                                                        className="text-green-600 hover:text-green-900"
-                                                    >
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleReject(farmer.userId._id)}
-                                                        className="text-red-600 hover:text-red-900"
-                                                    >
-                                                        Reject
-                                                    </button>
-                                                </div>
-                                            )}
-                                            {farmer.verificationStatus !== 'PENDING' && (
-                                                <span className="text-gray-400">No actions</span>
-                                            )}
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {!filteredFarmers || filteredFarmers.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                            No farmers found
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    filteredFarmers.map((farmer) => (
+                                        <tr key={farmer._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                                                        <User className="h-6 w-6 text-emerald-600" />
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-gray-900">{farmer.userId.name}</div>
+                                                        <div className="text-sm text-gray-500">{farmer.userId.email}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-900">{farmer.farmName}</div>
+                                                <div className="text-sm text-gray-500">
+                                                    {farmer.farmSize} acres • {farmer.farmingType}
+                                                </div>
+                                                <div className="text-sm text-gray-500">{farmer.experience} years experience</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {farmer.verificationStatus === 'APPROVED' && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <CheckCircle className="w-4 h-4 mr-1" />
+                                                        Approved
+                                                    </span>
+                                                )}
+                                                {farmer.verificationStatus === 'PENDING' && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                        <Clock className="w-4 h-4 mr-1" />
+                                                        Pending
+                                                    </span>
+                                                )}
+                                                {farmer.verificationStatus === 'REJECTED' && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        <XCircle className="w-4 h-4 mr-1" />
+                                                        Rejected
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {new Date(farmer.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                {farmer.verificationStatus === 'PENDING' && (
+                                                    <div className="flex space-x-2">
+                                                        <button
+                                                            onClick={() => handleApprove(farmer.userId._id)}
+                                                            className="text-green-600 hover:text-green-900"
+                                                        >
+                                                            Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleReject(farmer.userId._id)}
+                                                            className="text-red-600 hover:text-red-900"
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {farmer.verificationStatus !== 'PENDING' && (
+                                                    <span className="text-gray-400">No actions</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Farmers Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                    {!filteredFarmers || filteredFarmers.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500 bg-white rounded-lg shadow-sm border border-gray-100">
+                            No farmers found
+                        </div>
+                    ) : (
+                        filteredFarmers.map((farmer) => (
+                            <div key={farmer._id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <User className="h-6 w-6 text-emerald-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-gray-900 font-medium">{farmer.userId.name}</h3>
+                                            <p className="text-xs text-gray-500">{farmer.userId.email}</p>
+                                        </div>
+                                    </div>
+                                    {farmer.verificationStatus === 'APPROVED' && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>
+                                    )}
+                                    {farmer.verificationStatus === 'PENDING' && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                                    )}
+                                    {farmer.verificationStatus === 'REJECTED' && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rejected</span>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2 text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <div className="flex justify-between">
+                                        <span>Farm Name:</span>
+                                        <span className="font-medium text-gray-900">{farmer.farmName}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Details:</span>
+                                        <span className="font-medium text-gray-900">{farmer.farmSize} acres • {farmer.farmingType}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Experience:</span>
+                                        <span className="font-medium text-gray-900">{farmer.experience} years</span>
+                                    </div>
+                                </div>
+
+                                {farmer.verificationStatus === 'PENDING' && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleApprove(farmer.userId._id)}
+                                            className="flex-1 bg-green-50 text-green-700 py-2 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors"
+                                        >
+                                            Approve
+                                        </button>
+                                        <button
+                                            onClick={() => handleReject(farmer.userId._id)}
+                                            className="flex-1 bg-red-50 text-red-700 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
+                                        >
+                                            Reject
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

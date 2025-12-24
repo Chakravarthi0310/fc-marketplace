@@ -18,6 +18,7 @@ export default function PaymentPage() {
     const router = useRouter();
     const { currentOrder, fetchOrderById, isLoading: orderLoading } = useOrderStore();
     const [initializing, setInitializing] = useState(true);
+    const [verifying, setVerifying] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,8 +32,13 @@ export default function PaymentPage() {
 
         try {
             setInitializing(true);
-            const response = await paymentService.createOrder(currentOrder._id);
-            const paymentData = response; // Updated to match service change
+            const paymentData = await paymentService.createOrder(currentOrder._id);
+
+            if ((paymentData as any).alreadyPaid) {
+                toast.success('Order already paid!');
+                router.push('/orders');
+                return;
+            }
 
             const options = {
                 key: paymentData.razorpayKeyId,
@@ -41,11 +47,26 @@ export default function PaymentPage() {
                 name: 'FC Marketplace',
                 description: `Order #${paymentData.orderNumber}`,
                 order_id: paymentData.razorpayOrderId,
-                handler: async function (response: any) {
-                    toast.success('Payment successful! Verifying...');
-                    // Razorpay uses webhooks for verification in this setup
-                    // We just redirect to orders page and let the webhook handle status update
-                    router.push('/orders');
+                handler: async function (rzpResponse: any) {
+                    try {
+                        setVerifying(true);
+                        toast.loading('Verifying payment...');
+
+                        await paymentService.verify(paymentData.paymentId, {
+                            razorpay_order_id: rzpResponse.razorpay_order_id,
+                            razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                            razorpay_signature: rzpResponse.razorpay_signature,
+                        });
+
+                        toast.dismiss();
+                        toast.success('Payment successful!');
+                        router.push('/orders');
+                    } catch (err: any) {
+                        toast.dismiss();
+                        console.error('Verification error:', err);
+                        setError(err.response?.data?.message || 'Payment verification failed. Please contact support.');
+                        setVerifying(false);
+                    }
                 },
                 prefill: {
                     name: '', // Can be filled from user store
@@ -81,11 +102,13 @@ export default function PaymentPage() {
         }
     }, [currentOrder, handlePayment, initializing, router]);
 
-    if (orderLoading || (initializing && !error)) {
+    if (orderLoading || (initializing && !error) || verifying) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
                 <Loader2 className="w-12 h-12 animate-spin text-green-600 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-900">Initializing Secure Payment...</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                    {verifying ? 'Verifying Payment...' : 'Initializing Secure Payment...'}
+                </h2>
                 <p className="text-gray-600 mt-2 text-center">Please do not close this window or refresh the page.</p>
             </div>
         );

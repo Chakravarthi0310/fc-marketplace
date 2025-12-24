@@ -5,26 +5,31 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/slices/authStore';
 import { productService } from '@/services/product.service';
 import { orderService } from '@/services/order.service';
-import { Plus, Package, Edit, Trash2, AlertCircle, Clock, ShoppingBag } from 'lucide-react';
-import Image from 'next/image';
+import { Plus, Package, ShoppingBag, Search, AlertCircle, Clock, CheckCircle, XCircle, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
+import StatsOverview from '@/components/farmer/StatsOverview';
+import ProductCard from '@/components/farmer/ProductCard';
+import OrderCard from '@/components/farmer/OrderCard';
+import { Product } from '@/store/types';
 
 type TabType = 'products' | 'orders';
 
 export default function FarmerDashboard() {
     const router = useRouter();
-    const { user } = useAuthStore();
-    const [products, setProducts] = useState<any[]>([]);
+    const { user, logout } = useAuthStore();
+    const [products, setProducts] = useState<Product[]>([]);
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [farmerProfile, setFarmerProfile] = useState<any>(null);
     const [profileLoading, setProfileLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('products');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         fetchFarmerProfile();
     }, []);
+
 
     useEffect(() => {
         if (farmerProfile?.verificationStatus === 'APPROVED') {
@@ -40,7 +45,6 @@ export default function FarmerDashboard() {
             const { data } = await api.get('/farmers');
             setFarmerProfile(data.data);
         } catch (error: any) {
-            // No profile exists
             if (error.response?.status === 404) {
                 setFarmerProfile(null);
             } else {
@@ -54,16 +58,10 @@ export default function FarmerDashboard() {
     const fetchMyProducts = async () => {
         try {
             const allProducts = await productService.getAll();
-            console.log('All products:', allProducts);
-            console.log('Farmer profile ID:', farmerProfile?._id);
-
-            // Filter products by current farmer's farmerId (convert to string for comparison)
+            // Filter products by current farmer's farmerId
             const myProducts = allProducts.filter((p: any) => {
-                console.log('Product farmerId:', p.farmerId, 'Farmer ID:', farmerProfile?._id);
                 return p.farmerId?.toString() === farmerProfile?._id?.toString();
             });
-
-            console.log('My products:', myProducts);
             setProducts(myProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -95,11 +93,16 @@ export default function FarmerDashboard() {
         }
     };
 
-    // Show loading state
+    // Filter products based on search
+    const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Initial Loading State
     if (profileLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <p className="text-gray-500">Loading...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
         );
     }
@@ -109,10 +112,12 @@ export default function FarmerDashboard() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-                    <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">No Farmer Profile</h2>
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <AlertCircle className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Become a Seller</h2>
                     <p className="text-gray-600 mb-6">
-                        You need to create a farmer profile before you can list products.
+                        Create your farmer profile to start selling your fresh produce directly to customers.
                     </p>
                     <button
                         onClick={() => router.push('/farmer/profile/create')}
@@ -130,23 +135,18 @@ export default function FarmerDashboard() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-                    <Clock className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Pending Approval</h2>
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Clock className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Under Review</h2>
                     <p className="text-gray-600 mb-4">
-                        Your farmer profile is currently under review by our admin team.
+                        Your profile is currently being reviewed by our admin team. This usually takes 24-48 hours.
                     </p>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
+                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-left">
                         <p className="text-sm text-blue-800">
-                            <strong>Farm Name:</strong> {farmerProfile.farmName}
-                            <br />
-                            <strong>Phone:</strong> {farmerProfile.phone}
-                            <br />
-                            <strong>Address:</strong> {farmerProfile.address}
+                            <strong>Note:</strong> You'll be notified via email once your account is approved.
                         </p>
                     </div>
-                    <p className="text-sm text-gray-500 mt-4">
-                        You'll be able to list products once your profile is approved.
-                    </p>
                 </div>
             </div>
         );
@@ -157,195 +157,186 @@ export default function FarmerDashboard() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Rejected</h2>
-                    <p className="text-gray-600 mb-4">
-                        Unfortunately, your farmer profile was not approved.
-                    </p>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-left mb-4">
-                        <p className="text-sm text-red-800">
-                            Please contact support for more information or to resubmit your application.
-                        </p>
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <XCircle className="w-8 h-8 text-red-600" />
                     </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Status</h2>
+                    <p className="text-gray-600 mb-4">
+                        Unfortunately, your farmer profile was not approved at this time.
+                    </p>
+                    <button className="text-green-600 hover:text-green-700 font-medium">
+                        Contact Support
+                    </button>
                 </div>
             </div>
         );
     }
 
-    // Approved - show dashboard
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Farmer Dashboard</h1>
-                            <p className="text-gray-600 mt-1">Manage your products and orders</p>
-                        </div>
-                        {activeTab === 'products' && (
+        <div className="min-h-screen bg-gray-50 pb-12">
+            {/* Header Section */}
+            <div className="bg-white border-b sticky top-0 z-30 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 py-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center justify-between md:justify-start gap-4">
+                            <div className="flex items-center gap-4">
+                                <a href="/" className="flex items-center gap-2 group">
+                                    <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent group-hover:from-green-700 group-hover:to-emerald-700 transition-all duration-200">
+                                        Farmcart
+                                    </span>
+                                </a>
+                                <div className="h-6 w-[1px] bg-gray-200 hidden md:block"></div>
+                                <div>
+                                    <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+                                    <p className="text-gray-500 text-xs mt-0.5">Welcome back, {farmerProfile.farmName}</p>
+                                </div>
+                            </div>
+                            {/* Mobile Logout - Visible only on small screens next to title */}
                             <button
-                                onClick={() => router.push('/farmer/products/create')}
-                                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+                                onClick={logout}
+                                className="md:hidden text-gray-500 hover:text-red-600 p-2 rounded-full hover:bg-gray-100 transition"
+                                title="Logout"
                             >
-                                <Plus className="w-5 h-5" />
-                                Add Product
+                                <LogOut className="w-6 h-6" />
                             </button>
-                        )}
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            {/* Desktop Logout */}
+                            <button
+                                onClick={logout}
+                                className="hidden md:flex items-center gap-2 text-gray-500 hover:text-red-600 px-4 py-2 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
+                            >
+                                Logout
+                            </button>
+
+                            {activeTab === 'products' && (
+                                <button
+                                    onClick={() => router.push('/farmer/products/create')}
+                                    className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg transition font-medium shadow-sm hover:shadow active:scale-95 duration-200 text-sm"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Product
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex gap-4 border-b">
+                    {/* Navigation Tabs */}
+                    <div className="flex items-center gap-6 mt-4 border-b-0 overflow-x-auto">
                         <button
                             onClick={() => setActiveTab('products')}
-                            className={`flex items-center gap-2 px-4 py-2 border-b-2 transition ${activeTab === 'products'
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors duration-200 flex items-center gap-2 ${activeTab === 'products'
                                 ? 'border-green-600 text-green-600'
-                                : 'border-transparent text-gray-600 hover:text-gray-900'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
-                            <Package className="w-5 h-5" />
-                            Products ({products.length})
+                            <Package className="w-4 h-4" />
+                            Products
+                            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                                {products.length}
+                            </span>
                         </button>
                         <button
                             onClick={() => setActiveTab('orders')}
-                            className={`flex items-center gap-2 px-4 py-2 border-b-2 transition ${activeTab === 'orders'
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors duration-200 flex items-center gap-2 ${activeTab === 'orders'
                                 ? 'border-green-600 text-green-600'
-                                : 'border-transparent text-gray-600 hover:text-gray-900'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
-                            <ShoppingBag className="w-5 h-5" />
-                            Orders ({orders.length})
+                            <ShoppingBag className="w-4 h-4" />
+                            Orders
+                            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                                {orders.length}
+                            </span>
                         </button>
                     </div>
                 </div>
             </div>
 
-
-            {/* Content */}
             <div className="max-w-7xl mx-auto px-4 py-8">
+                {/* Stats Overview */}
+                <StatsOverview products={products} orders={orders} farmerId={farmerProfile?._id} />
+
                 {activeTab === 'products' ? (
-                    /* Products Grid */
-                    isLoading ? (
-                        <div className="text-center py-12">
-                            <p className="text-gray-500">Loading...</p>
+                    <div className="space-y-6">
+                        {/* Search Bar */}
+                        <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search products..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition outline-none"
+                            />
                         </div>
-                    ) : products.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-                            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <h2 className="text-xl font-semibold text-gray-900 mb-2">No products yet</h2>
-                            <p className="text-gray-600 mb-6">Start by adding your first product</p>
-                            <button
-                                onClick={() => router.push('/farmer/products/create')}
-                                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
-                            >
-                                <Plus className="w-5 h-5" />
-                                Add Product
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {products.map((product) => (
-                                <div key={product._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                                    {/* Product Image */}
-                                    <div className="relative h-48 bg-gray-200">
-                                        {product.images && product.images.length > 0 ? (
-                                            <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                <Package className="w-12 h-12" />
-                                            </div>
-                                        )}
-                                    </div>
 
-                                    {/* Product Info */}
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-lg text-gray-900 mb-1">{product.name}</h3>
-                                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
-                                                <span className="text-gray-500 text-sm">/{product.unit}</span>
-                                            </div>
-                                            <span className="text-sm text-gray-500">Stock: {product.stock}</span>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => router.push(`/farmer/products/edit/${product._id}`)}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(product._id)}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
+                        {isLoading ? (
+                            <div className="flex justify-center py-12">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                            </div>
+                        ) : filteredProducts.length === 0 ? (
+                            <div className="bg-white rounded-xl shadow-sm border border-dashed border-gray-300 p-12 text-center">
+                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Package className="w-8 h-8 text-gray-400" />
                                 </div>
-                            ))}
-                        </div>
-                    )
+                                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                                    {searchQuery ? 'No products found' : 'No products listed yet'}
+                                </h3>
+                                <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+                                    {searchQuery
+                                        ? `We couldn't find any products matching "${searchQuery}"`
+                                        : "Start building your catalog by adding your first product from the farm."
+                                    }
+                                </p>
+                                {!searchQuery && (
+                                    <button
+                                        onClick={() => router.push('/farmer/products/create')}
+                                        className="inline-flex items-center gap-2 text-green-600 font-medium hover:text-green-700"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add your first product
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredProducts.map((product) => (
+                                    <ProductCard
+                                        key={product._id}
+                                        product={product}
+                                        onEdit={(id) => router.push(`/farmer/products/edit/${id}`)}
+                                        onDelete={handleDelete}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 ) : (
-                    /* Orders View */
-                    orders.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-                            <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <h2 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h2>
-                            <p className="text-gray-600">Orders containing your products will appear here</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {orders.map((order: any) => (
-                                <div key={order._id} className="bg-white rounded-xl shadow-sm p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h3 className="font-semibold text-lg text-gray-900">Order #{order._id.slice(-8)}</h3>
-                                            <p className="text-sm text-gray-500">
-                                                {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
-                                            </p>
-                                        </div>
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                                            order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                                                order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-yellow-100 text-yellow-800'
-                                            }`}>
-                                            {order.status}
-                                        </span>
-                                    </div>
-
-                                    <div className="border-t pt-4">
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Your Items:</p>
-                                        {order.items?.filter((item: any) =>
-                                            item.farmerId?.toString() === farmerProfile?._id?.toString()
-                                        ).map((item: any, idx: number) => (
-                                            <div key={idx} className="flex justify-between text-sm py-2">
-                                                <span className="text-gray-600">
-                                                    {item.name} × {item.quantity}
-                                                </span>
-                                                <span className="font-medium text-gray-900">₹{item.price * item.quantity}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="border-t mt-4 pt-4 flex justify-between items-center">
-                                        <span className="text-sm text-gray-600">Total Amount</span>
-                                        <span className="text-lg font-bold text-gray-900">₹{order.totalAmount}</span>
-                                    </div>
+                    <div className="space-y-6">
+                        {orders.length === 0 ? (
+                            <div className="bg-white rounded-xl shadow-sm border border-dashed border-gray-300 p-12 text-center">
+                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <ShoppingBag className="w-8 h-8 text-gray-400" />
                                 </div>
-                            ))}
-                        </div>
-                    )
+                                <h3 className="text-lg font-medium text-gray-900 mb-1">No orders received yet</h3>
+                                <p className="text-gray-500 mb-6">
+                                    Orders will appear here once customers start buying your products.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {orders.map((order) => (
+                                    <OrderCard
+                                        key={order._id}
+                                        order={order}
+                                        farmerId={farmerProfile?._id}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </div>
