@@ -34,16 +34,12 @@ export const productService = {
     },
 
     async uploadImage(uploadUrl: string, file: File): Promise<void> {
-        const response = await fetch(uploadUrl, {
+        await fetch(uploadUrl, {
             method: 'PUT',
             body: file,
             headers: {
                 'Content-Type': file.type,
             },
         });
-
-        if (!response.ok) {
-            throw new Error(`Upload failed with status: ${response.status} ${response.statusText}`);
-        }
     },
 };
