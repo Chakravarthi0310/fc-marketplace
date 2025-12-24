@@ -95,6 +95,15 @@ export default function EditProductPage() {
         setIsLoading(true);
 
         try {
+            let imageUrl = imagePreview; // Default to existing image
+
+            // Handle Image Upload if a new file is selected
+            if (imageFile) {
+                const { uploadUrl, imageUrl: newImageUrl } = await productService.getUploadUrl(productId, imageFile.type);
+                await productService.uploadImage(uploadUrl, imageFile);
+                imageUrl = newImageUrl;
+            }
+
             const productData: any = {
                 name: formData.name,
                 description: formData.description,
@@ -103,6 +112,7 @@ export default function EditProductPage() {
                 stock: parseInt(formData.stock),
                 category: formData.category,
                 isActive: formData.isActive,
+                images: [imageUrl], // Update images array
             };
 
             await productService.update(productId, productData);
@@ -110,6 +120,7 @@ export default function EditProductPage() {
             toast.success('Product updated successfully!');
             router.push('/farmer/dashboard');
         } catch (error: any) {
+            console.error('Update failed:', error);
             toast.error(error.response?.data?.message || 'Failed to update product');
         } finally {
             setIsLoading(false);

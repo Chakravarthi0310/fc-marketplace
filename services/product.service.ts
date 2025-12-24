@@ -27,4 +27,19 @@ export const productService = {
     async delete(id: string): Promise<void> {
         await api.delete(`/products/${id}`);
     },
+
+    async getUploadUrl(id: string, contentType: string): Promise<{ uploadUrl: string; imageUrl: string }> {
+        const response = await api.post(`/products/${id}/image-upload-url`, { contentType });
+        return response.data;
+    },
+
+    async uploadImage(uploadUrl: string, file: File): Promise<void> {
+        await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type,
+            },
+        });
+    },
 };
