@@ -34,7 +34,6 @@ export const productService = {
     },
 
     async uploadImage(uploadUrl: string, file: File): Promise<void> {
-        console.log('DEBUG: Uploading to:', uploadUrl);
         await fetch(uploadUrl, {
             method: 'PUT',
             body: file,
