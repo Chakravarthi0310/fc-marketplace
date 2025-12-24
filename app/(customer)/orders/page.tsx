@@ -43,10 +43,10 @@ export default function OrdersPage() {
     const getStatusStep = (status: string) => {
         switch (status) {
             case 'PAYMENT_PENDING': return 0;
-            case 'PAID': return 1;
-            case 'CONFIRMED': return 2;
-            case 'SHIPPED': return 3;
-            case 'DELIVERED': return 4;
+            case 'PAID': return 0; // Still processed as placed
+            case 'CONFIRMED': return 1;
+            case 'SHIPPED': return 2;
+            case 'DELIVERED': return 3;
             case 'CANCELLED': return -1;
             default: return 0;
         }

@@ -37,10 +37,10 @@ export default function OrderDetailsPage() {
     const getStatusStep = (status: string) => {
         switch (status) {
             case 'PAYMENT_PENDING': return 0;
-            case 'PAID': return 1;
-            case 'CONFIRMED': return 2;
-            case 'SHIPPED': return 3;
-            case 'DELIVERED': return 4;
+            case 'PAID': return 0; // Still processed as placed
+            case 'CONFIRMED': return 1;
+            case 'SHIPPED': return 2;
+            case 'DELIVERED': return 3;
             case 'CANCELLED': return -1;
             default: return 0;
         }
@@ -92,8 +92,8 @@ export default function OrderDetailsPage() {
 
                                         {/* Icon */}
                                         <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 ${idx <= currentStep
-                                                ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
-                                                : 'bg-white border-gray-200 text-gray-300'
+                                            ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
+                                            : 'bg-white border-gray-200 text-gray-300'
                                             }`}>
                                             <step.icon className="w-5 h-5" />
                                         </div>
