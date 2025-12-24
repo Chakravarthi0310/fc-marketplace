@@ -223,8 +223,8 @@ export default function OrdersPage() {
                                             {/* Simple Badge (Mobile/Cancelled) */}
                                             <div className={`${order.status !== 'CANCELLED' ? 'md:hidden' : ''}`}>
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-800' :
-                                                        order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                                                            'bg-blue-100 text-blue-800'
+                                                    order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                        'bg-blue-100 text-blue-800'
                                                     }`}>
                                                     {order.status.replace(/_/g, ' ')}
                                                 </span>
@@ -253,7 +253,7 @@ export default function OrdersPage() {
                                                     </div>
                                                     <div className="hidden sm:block text-right self-center">
                                                         <Link
-                                                            href={`/products/${item.productId._id || item.productId}`}
+                                                            href={`/products/${typeof item.productId === 'object' ? (item.productId as any)._id : item.productId}`}
                                                             className="text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline"
                                                         >
                                                             View Item
@@ -273,9 +273,8 @@ export default function OrdersPage() {
 
                                             <div className="flex w-full sm:w-auto gap-3">
                                                 <Link
-                                                    href={`/orders/${order._id}`} // Assuming we might add a dedicated details page later, but for now just visual
+                                                    href={`/orders/${order._id}`}
                                                     className="flex-1 sm:flex-none px-6 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors text-center text-sm"
-                                                    onClick={(e) => e.preventDefault()} // Placeholder link behavior
                                                 >
                                                     Track Package
                                                 </Link>
