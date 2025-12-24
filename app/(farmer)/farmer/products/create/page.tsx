@@ -58,7 +58,7 @@ export default function CreateProductPage() {
         setIsLoading(true);
 
         try {
-            // Create product payload
+            // 1. Create the product first to get an ID
             const productData: any = {
                 name: formData.name,
                 description: formData.description,
@@ -66,17 +66,37 @@ export default function CreateProductPage() {
                 unit: formData.unit,
                 stock: parseInt(formData.stock),
                 category: formData.category,
+                images: [], // Initially empty
             };
 
-            // Note: File upload would require multipart/form-data handling
-            // For now, we'll create the product without images
-            // Image upload can be implemented later via the /products/:id/image-upload-url endpoint
+            const newProduct = await productService.create(productData);
+            const productId = newProduct._id;
 
-            await productService.create(productData);
+            // 2. If an image is selected, upload it
+            if (imageFile && productId) {
+                try {
+                    // Get pre-signed URL
+                    const { uploadUrl, imageUrl } = await productService.getUploadUrl(productId, imageFile.type);
+
+                    // Upload to S3
+                    await productService.uploadImage(uploadUrl, imageFile);
+
+                    // Update product with the image URL
+                    await productService.update(productId, {
+                        images: [imageUrl]
+                    });
+                } catch (uploadError) {
+                    console.error('Image upload failed:', uploadError);
+                    toast.error('Product created, but image upload failed. You can add it later by editing the product.');
+                    router.push('/farmer/dashboard');
+                    return;
+                }
+            }
 
             toast.success('Product created successfully!');
             router.push('/farmer/dashboard');
         } catch (error: any) {
+            console.error('Creation failed:', error);
             toast.error(error.response?.data?.message || 'Failed to create product');
         } finally {
             setIsLoading(false);
@@ -237,7 +257,7 @@ export default function CreateProductPage() {
                         <p className="text-sm text-blue-800">
                             ℹ️ <strong>Description:</strong> Minimum 5 characters required.
                             <br />
-                            ℹ️ <strong>Image:</strong> Optional. File upload feature coming soon - products will use a default image for now.
+                            ℹ️ <strong>Image:</strong> Optional. Images are stored securely on AWS S3.
                         </p>
                     </div>
 
