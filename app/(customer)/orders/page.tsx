@@ -237,9 +237,18 @@ export default function OrdersPage() {
                                         <div className="space-y-6">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex gap-4 sm:gap-6">
-                                                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200">
-                                                        {/* Ideally we'd have images here, using fallback for now */}
-                                                        <Package className="w-8 h-8 text-gray-400" />
+                                                    <div className="w-20 h-20 bg-gray-50 rounded-lg flex-shrink-0 relative overflow-hidden border border-gray-100">
+                                                        {item.image ? (
+                                                            <img
+                                                                src={item.image}
+                                                                alt={item.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                                                <Package className="w-8 h-8 text-gray-400" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="flex-1 min-w-0 py-1">
                                                         <h3 className="font-semibold text-gray-900 truncate text-lg">{item.name}</h3>

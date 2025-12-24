@@ -370,8 +370,19 @@ export default function OrdersPage() {
                                                                 <h4 className="font-semibold text-gray-900 mb-2">Order Items</h4>
                                                                 <div className="space-y-2">
                                                                     {order.items.map((item, idx) => (
-                                                                        <div key={idx} className="flex justify-between text-sm">
-                                                                            <span>{item.name} x {item.quantity} {item.unit}</span>
+                                                                        <div key={idx} className="flex justify-between items-center text-sm py-1 border-b border-gray-100 last:border-0">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className="w-10 h-10 bg-white rounded border border-gray-200 overflow-hidden relative flex-shrink-0">
+                                                                                    {(item as any).image ? (
+                                                                                        <img src={(item as any).image} alt={item.name} className="w-full h-full object-cover" />
+                                                                                    ) : (
+                                                                                        <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300">
+                                                                                            <Package className="w-4 h-4" />
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <span>{item.name} x {item.quantity} {item.unit}</span>
+                                                                            </div>
                                                                             <span className="font-medium">₹{(item.price * item.quantity).toLocaleString()}</span>
                                                                         </div>
                                                                     ))}

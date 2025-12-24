@@ -126,8 +126,10 @@ export default function OrderDetailsPage() {
                         {order.items.map((item: any, idx: number) => (
                             <div key={idx} className="p-6 flex gap-4">
                                 <div className="w-20 h-20 bg-gray-50 rounded-lg flex-shrink-0 flex items-center justify-center relative overflow-hidden">
-                                    {item.productId && typeof item.productId === 'object' && item.productId.images && item.productId.images[0] ? (
-                                        <Image src={item.productId.images[0]} alt={item.name} fill className="object-cover" />
+                                    {item.image ? (
+                                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                                    ) : item.productId && typeof item.productId === 'object' && (item.productId as any).images?.[0] ? (
+                                        <Image src={(item.productId as any).images[0]} alt={item.name} fill className="object-cover" />
                                     ) : (
                                         <Package className="w-8 h-8 text-emerald-200" />
                                     )}
